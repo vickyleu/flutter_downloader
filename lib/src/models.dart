@@ -56,6 +56,7 @@ class DownloadTask {
     required this.status,
     required this.progress,
     required this.url,
+    required this.fid,
     required this.filename,
     required this.savedDir,
     required this.timeCreated,
@@ -73,6 +74,9 @@ class DownloadTask {
   /// URL from which the file is downloaded.
   final String url;
 
+  /// File id
+  final String fid;
+
   /// Local file name of the downloaded file.
   final String? filename;
 
@@ -84,5 +88,5 @@ class DownloadTask {
 
   @override
   String toString() =>
-      'DownloadTask(taskId: $taskId, status: $status, progress: $progress, url: $url, filename: $filename, savedDir: $savedDir, timeCreated: $timeCreated)';
+      'DownloadTask(taskId: $taskId, status: $status, progress: $progress, url: $url, fid: $fid, filename: $filename, savedDir: $savedDir, timeCreated: $timeCreated)';
 }

@@ -156,6 +156,7 @@ class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
     private fun enqueue(call: MethodCall, result: MethodChannel.Result) {
         val url: String = call.requireArgument("url")
         val savedDir: String = call.requireArgument("saved_dir")
+        val fid: String = call.requireArgument("fid")
         val filename: String? = call.argument("file_name")
         val headers: String = call.requireArgument("headers")
         val showNotification: Boolean = call.requireArgument("show_notification")
@@ -171,7 +172,7 @@ class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
         result.success(taskId)
         sendUpdateProgress(taskId, DownloadStatus.ENQUEUED, 0)
         taskDao!!.insertOrUpdateNewTask(
-            taskId, url, DownloadStatus.ENQUEUED, 0, filename,
+            taskId, url, DownloadStatus.ENQUEUED, 0, fid, filename,
             savedDir, headers, showNotification, openFileFromNotification, saveInPublicStorage
         )
     }
@@ -185,6 +186,7 @@ class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
             item["status"] = task.status.ordinal
             item["progress"] = task.progress
             item["url"] = task.url
+            item["fid"] = task.fid
             item["file_name"] = task.filename
             item["saved_dir"] = task.savedDir
             item["time_created"] = task.timeCreated
@@ -203,6 +205,7 @@ class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
             item["status"] = task.status.ordinal
             item["progress"] = task.progress
             item["url"] = task.url
+            item["fid"] = task.fid
             item["file_name"] = task.filename
             item["saved_dir"] = task.savedDir
             item["time_created"] = task.timeCreated

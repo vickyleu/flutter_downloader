@@ -9,6 +9,7 @@ object TaskEntry : BaseColumns {
     const val COLUMN_NAME_PROGRESS = "progress"
     const val COLUMN_NAME_URL = "url"
     const val COLUMN_NAME_SAVED_DIR = "saved_dir"
+    const val COLUMN_NAME_FILE_FID = "fid"
     const val COLUMN_NAME_FILE_NAME = "file_name"
     const val COLUMN_NAME_MIME_TYPE = "mime_type"
     const val COLUMN_NAME_RESUMABLE = "resumable"

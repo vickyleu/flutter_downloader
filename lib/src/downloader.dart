@@ -93,6 +93,7 @@ class FlutterDownloader {
   static Future<String?> enqueue({
     required String url,
     required String savedDir,
+    required String fid, // fid：文件id
     String? fileName,
     Map<String, String> headers = const {},
     bool showNotification = true,
@@ -107,6 +108,7 @@ class FlutterDownloader {
       final taskId = await _channel.invokeMethod<String>('enqueue', {
         'url': url,
         'saved_dir': savedDir,
+        'fid': fid,
         'file_name': fileName,
         'headers': jsonEncode(headers),
         'show_notification': showNotification,
@@ -147,12 +149,12 @@ class FlutterDownloader {
       return result.map(
         (dynamic item) {
           // item as Map<String, dynamic>; // throws
-
           return DownloadTask(
             taskId: item['task_id'] as String,
             status: DownloadTaskStatus(item['status'] as int),
             progress: item['progress'] as int,
             url: item['url'] as String,
+            fid: item['fid'] as String,
             filename: item['file_name'] as String?,
             savedDir: item['saved_dir'] as String,
             timeCreated: item['time_created'] as int,
@@ -210,6 +212,7 @@ class FlutterDownloader {
             status: DownloadTaskStatus(item['status'] as int),
             progress: item['progress'] as int,
             url: item['url'] as String,
+            fid: item['fid'] as String,
             filename: item['file_name'] as String?,
             savedDir: item['saved_dir'] as String,
             timeCreated: item['time_created'] as int,

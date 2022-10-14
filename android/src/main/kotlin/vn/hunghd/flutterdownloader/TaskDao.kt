@@ -28,6 +28,7 @@ class TaskDao(private val dbHelper: TaskDbHelper) {
         url: String?,
         status: DownloadStatus,
         progress: Int,
+        fid: String?,
         fileName: String?,
         savedDir: String?,
         headers: String?,
@@ -41,6 +42,7 @@ class TaskDao(private val dbHelper: TaskDbHelper) {
         values.put(TaskEntry.COLUMN_NAME_URL, url)
         values.put(TaskEntry.COLUMN_NAME_STATUS, status.ordinal)
         values.put(TaskEntry.COLUMN_NAME_PROGRESS, progress)
+        values.put(TaskEntry.COLUMN_NAME_FILE_FID, fid)
         values.put(TaskEntry.COLUMN_NAME_FILE_NAME, fileName)
         values.put(TaskEntry.COLUMN_NAME_SAVED_DIR, savedDir)
         values.put(TaskEntry.COLUMN_NAME_HEADERS, headers)
@@ -234,6 +236,7 @@ class TaskDao(private val dbHelper: TaskDbHelper) {
         val status = cursor.getInt(cursor.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_STATUS))
         val progress = cursor.getInt(cursor.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_PROGRESS))
         val url = cursor.getString(cursor.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_URL))
+        val fid = cursor.getString(cursor.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_FILE_FID))
         val filename = cursor.getString(cursor.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_FILE_NAME))
         val savedDir = cursor.getString(cursor.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_SAVED_DIR))
         val headers = cursor.getString(cursor.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_HEADERS))
@@ -249,6 +252,7 @@ class TaskDao(private val dbHelper: TaskDbHelper) {
             DownloadStatus.values()[status],
             progress,
             url,
+            fid,
             filename,
             savedDir,
             headers,
