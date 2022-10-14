@@ -10,6 +10,10 @@ This plugin is using [`WorkManager`][work_manager] on Android and
 [`NSURLSessionDownloadTask`][url_session_download_task] on iOS to run download
 tasks in background.
 
+
+
+### 支持文件id存取
+
 ### _Development note_:
 
 _The changes of external storage APIs in Android 11 cause some problems with the
