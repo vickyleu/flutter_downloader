@@ -12,6 +12,7 @@ class TaskDao(private val dbHelper: TaskDbHelper) {
         TaskEntry.COLUMN_NAME_PROGRESS,
         TaskEntry.COLUMN_NAME_STATUS,
         TaskEntry.COLUMN_NAME_URL,
+        TaskEntry.COLUMN_NAME_FILE_FID,
         TaskEntry.COLUMN_NAME_FILE_NAME,
         TaskEntry.COLUMN_NAME_SAVED_DIR,
         TaskEntry.COLUMN_NAME_HEADERS,
