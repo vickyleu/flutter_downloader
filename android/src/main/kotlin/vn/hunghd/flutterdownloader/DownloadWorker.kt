@@ -516,7 +516,13 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
         val contentResolver = applicationContext.contentResolver
         try {
-            return contentResolver.insert(collection, values)
+            var isInsert = contentResolver.insert(collection, values)
+            if (isInsert == null ){
+//                contentResolver.delete(collection,MediaStore.Downloads.DISPLAY_NAME, arrayOf(filename!!))
+                contentResolver.delete(collection, null, null)
+                isInsert = contentResolver.insert(collection, values)
+            }
+            return isInsert
         } catch (e: Exception) {
             e.printStackTrace()
             logError("Create a file using MediaStore API failed.")
