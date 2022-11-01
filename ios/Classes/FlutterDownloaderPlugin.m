@@ -11,6 +11,7 @@
 
 #define KEY_URL @"url"
 #define KEY_SAVED_DIR @"saved_dir"
+#define KEY_FILE_FID @"fid"
 #define KEY_FILE_NAME @"file_name"
 #define KEY_PROGRESS @"progress"
 #define KEY_ID @"id"
@@ -215,18 +216,10 @@ static NSMutableDictionary<NSString*, NSMutableDictionary*> *_runningTaskById = 
             NSURLSessionTaskState state = download.state;
             NSString *taskIdValue = [weakSelf identifierForTask:download];
             if ([taskId isEqualToString:taskIdValue] && (state == NSURLSessionTaskStateRunning)) {
+                int64_t bytesReceived = download.countOfBytesReceived;
+                int64_t bytesExpectedToReceive = download.countOfBytesExpectedToReceive;
+                int progress = round(bytesReceived * 100 / (double)bytesExpectedToReceive);
                 NSDictionary *task = [weakSelf loadTaskWithId:taskIdValue];
-                
-                int progress = 0;
-                if (download.countOfBytesExpectedToReceive > 0) {
-                    int64_t bytesReceived = download.countOfBytesReceived;
-                    int64_t bytesExpectedToReceive = download.countOfBytesExpectedToReceive;
-                    progress = round(bytesReceived * 100 / (double)bytesExpectedToReceive);
-                } else {
-                    NSNumber *progressNumOfTask = task[@"progress"];
-                    progress = progressNumOfTask.intValue;
-                }
-                
                 [download cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
                     // Save partial downloaded data to a file
                     NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -420,10 +413,10 @@ static NSMutableDictionary<NSString*, NSMutableDictionary*> *_runningTaskById = 
     : [origin stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
 }
 
-- (void) addNewTask: (NSString*) taskId url: (NSString*) url status: (int) status progress: (int) progress filename: (NSString*) filename savedDir: (NSString*) savedDir headers: (NSString*) headers resumable: (BOOL) resumable showNotification: (BOOL) showNotification openFileFromNotification: (BOOL) openFileFromNotification
+- (void) addNewTask: (NSString*) taskId url: (NSString*) url status: (int) status progress: (int) progress fid: (NSString*) fid filename: (NSString*) filename savedDir: (NSString*) savedDir headers: (NSString*) headers resumable: (BOOL) resumable showNotification: (BOOL) showNotification openFileFromNotification: (BOOL) openFileFromNotification
 {
     headers = [self escape:headers revert:false];
-    NSString *query = [NSString stringWithFormat:@"INSERT INTO task (task_id,url,status,progress,file_name,saved_dir,headers,resumable,show_notification,open_file_from_notification,time_created) VALUES (\"%@\",\"%@\",%d,%d,\"%@\",\"%@\",\"%@\",%d,%d,%d,%lld)", taskId, url, status, progress, filename, savedDir, headers, resumable ? 1 : 0, showNotification ? 1 : 0, openFileFromNotification ? 1 : 0, [self currentTimeInMilliseconds]];
+    NSString *query = [NSString stringWithFormat:@"INSERT INTO task (task_id,url,status,progress,fid, file_name,saved_dir,headers,resumable,show_notification,open_file_from_notification,time_created) VALUES (\"%@\",\"%@\",%d,%d, \"%@\",\"%@\",\"%@\",\"%@\",%d,%d,%d,%lld)", taskId, url, status, progress, fid, filename, savedDir, headers, resumable ? 1 : 0, showNotification ? 1 : 0, openFileFromNotification ? 1 : 0, [self currentTimeInMilliseconds]];
     [_dbManager executeQuery:query];
     if (debug) {
         if (_dbManager.affectedRows != 0) {
@@ -574,6 +567,7 @@ static NSMutableDictionary<NSString*, NSMutableDictionary*> *_runningTaskById = 
         int status = [[record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"status"]] intValue];
         int progress = [[record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"progress"]] intValue];
         NSString *url = [record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"url"]];
+        NSString *fid = [record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"fid"]];
         NSString *filename = [record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"file_name"]];
         NSString *savedDir = [self absoluteSavedDirPath:[record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"saved_dir"]]];
         NSString *headers = @"";
@@ -588,7 +582,7 @@ static NSMutableDictionary<NSString*, NSMutableDictionary*> *_runningTaskById = 
         int showNotification = [[record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"show_notification"]] intValue];
         int openFileFromNotification = [[record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"open_file_from_notification"]] intValue];
         long long timeCreated = [[record objectAtIndex:[_dbManager.arrColumnNames indexOfObject:@"time_created"]] longLongValue];
-        return [NSDictionary dictionaryWithObjectsAndKeys:taskId, KEY_TASK_ID, @(status), KEY_STATUS, @(progress), KEY_PROGRESS, url, KEY_URL, filename, KEY_FILE_NAME, headers, KEY_HEADERS, savedDir, KEY_SAVED_DIR, [NSNumber numberWithBool:(resumable == 1)], KEY_RESUMABLE, [NSNumber numberWithBool:(showNotification == 1)], KEY_SHOW_NOTIFICATION, [NSNumber numberWithBool:(openFileFromNotification == 1)], KEY_OPEN_FILE_FROM_NOTIFICATION, @(timeCreated), KEY_TIME_CREATED, nil];
+        return [NSDictionary dictionaryWithObjectsAndKeys:taskId, KEY_TASK_ID, @(status), KEY_STATUS, @(progress), KEY_PROGRESS, url, KEY_URL, fid, KEY_FILE_FID,  filename, KEY_FILE_NAME, headers, KEY_HEADERS, savedDir, KEY_SAVED_DIR, [NSNumber numberWithBool:(resumable == 1)], KEY_RESUMABLE, [NSNumber numberWithBool:(showNotification == 1)], KEY_SHOW_NOTIFICATION, [NSNumber numberWithBool:(openFileFromNotification == 1)], KEY_OPEN_FILE_FROM_NOTIFICATION, @(timeCreated), KEY_TIME_CREATED, nil];
     } @catch(NSException *exception) {
         NSLog(@"invalid task data: %@", exception);
         return [NSDictionary dictionary];
@@ -636,6 +630,7 @@ static NSMutableDictionary<NSString*, NSMutableDictionary*> *_runningTaskById = 
     NSString *urlString = call.arguments[KEY_URL];
     NSString *savedDir = call.arguments[KEY_SAVED_DIR];
     NSString *shortSavedDir = [self shortenSavedDirPath:savedDir];
+    NSString *fid = call.arguments[KEY_FILE_FID];
     NSString *fileName = call.arguments[KEY_FILE_NAME];
     NSString *headers = call.arguments[KEY_HEADERS];
     NSNumber *showNotification = call.arguments[KEY_SHOW_NOTIFICATION];
@@ -647,6 +642,7 @@ static NSMutableDictionary<NSString*, NSMutableDictionary*> *_runningTaskById = 
 
     [_runningTaskById setObject: [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                   urlString, KEY_URL,
+                                  fid, KEY_FILE_FID,
                                   fileName, KEY_FILE_NAME,
                                   savedDir, KEY_SAVED_DIR,
                                   headers, KEY_HEADERS,
@@ -660,7 +656,7 @@ static NSMutableDictionary<NSString*, NSMutableDictionary*> *_runningTaskById = 
     __typeof__(self) __weak weakSelf = self;
     
     [self executeInDatabaseQueueForTask:^{
-        [weakSelf addNewTask:taskId url:urlString status:STATUS_ENQUEUED progress:0 filename:fileName savedDir:shortSavedDir headers:headers resumable:NO showNotification: [showNotification boolValue] openFileFromNotification: [openFileFromNotification boolValue]];
+        [weakSelf addNewTask:taskId url:urlString status:STATUS_ENQUEUED progress:0 fid: fid filename:fileName savedDir:shortSavedDir headers:headers resumable:NO showNotification: [showNotification boolValue] openFileFromNotification: [openFileFromNotification boolValue]];
     }];
     result(taskId);
     [self sendUpdateProgressForTaskId:taskId inStatus:@(STATUS_ENQUEUED) andProgress:@0];
@@ -921,19 +917,10 @@ static NSMutableDictionary<NSString*, NSMutableDictionary*> *_runningTaskById = 
         int progress = round(totalBytesWritten * 100 / (double)totalBytesExpectedToWrite);
         NSNumber *lastProgress = _runningTaskById[taskId][KEY_PROGRESS];
         if (([lastProgress intValue] == 0 || (progress > ([lastProgress intValue] + _step)) || progress == 100) && progress != [lastProgress intValue]) {
-            
-            NSNumber *status;
-            if (downloadTask.state == NSURLSessionTaskStateRunning) {
-                status = @(STATUS_RUNNING);
-            } else {
-                NSDictionary *taskDict = [self loadTaskWithId:taskId];
-                status = taskDict[@"status"];
-            }
-            
-            [self sendUpdateProgressForTaskId:taskId inStatus:status andProgress:@(progress)];
+            [self sendUpdateProgressForTaskId:taskId inStatus:@(STATUS_RUNNING) andProgress:@(progress)];
             __typeof__(self) __weak weakSelf = self;
             [self executeInDatabaseQueueForTask:^{
-                [weakSelf updateTask:taskId status:status.intValue progress:progress];
+                [weakSelf updateTask:taskId status:STATUS_RUNNING progress:progress];
             }];
             _runningTaskById[taskId][KEY_PROGRESS] = @(progress);
         }
