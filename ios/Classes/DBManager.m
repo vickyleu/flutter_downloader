@@ -60,6 +60,37 @@
                 NSLog(@"create DB successfully");
             }
         }
+    } else {
+        NSString *query = @"SELECT * FROM task";
+        NSArray *records = [[NSArray alloc] initWithArray:[self loadDataFromDB:query]];
+        if (records.count == 0) {
+            // 1、先删除，修复先前数据库冲突的问题：缺少fid
+            NSError *oldError;
+            [[NSFileManager defaultManager] removeItemAtPath:destinationPath error:&oldError];
+            if (debug) {
+                if (oldError != nil) {
+                    NSLog(@"%@", [oldError localizedDescription]);
+                } else {
+                    NSLog(@"removed DB successfully");
+                }
+            }
+            // 2、再添加
+            if (![[NSFileManager defaultManager] fileExistsAtPath:destinationPath]) {
+                // The database file does not exist in the documents directory, so copy it from the main bundle now.
+                NSString *sourcePath = self.databaseFilePath;
+                NSError *error;
+                [[NSFileManager defaultManager] copyItemAtPath:sourcePath toPath:destinationPath error:&error];
+                
+                // Check if any error occurred during copying and display it.
+                if (debug) {
+                    if (error != nil) {
+                        NSLog(@"%@", [error localizedDescription]);
+                    } else {
+                        NSLog(@"create DB successfully");
+                    }
+                }
+            }
+        }
     }
 }
 
