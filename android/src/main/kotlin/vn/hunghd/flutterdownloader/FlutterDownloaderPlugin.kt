@@ -22,8 +22,6 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
     private var flutterChannel: MethodChannel? = null
@@ -381,16 +379,24 @@ class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
         val contentResolver: ContentResolver = requireContext().contentResolver
 
         // search the file in image store first
-        val imageCursor = contentResolver.query(imageQueryUri, projection, imageSelection, selectionArgs, null)
+        val imageCursor =
+            contentResolver.query(imageQueryUri, projection, imageSelection, selectionArgs, null)
         if (imageCursor != null && imageCursor.moveToFirst()) {
             // We found the ID. Deleting the item via the content provider will also remove the file
             val id: Long =
                 imageCursor.getLong(imageCursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID))
-            val deleteUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+            val deleteUri =
+                ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
             contentResolver.delete(deleteUri, null, null)
         } else {
             // File not found in image store DB, try to search in video store
-            val videoCursor = contentResolver.query(imageQueryUri, projection, imageSelection, selectionArgs, null)
+            val videoCursor = contentResolver.query(
+                imageQueryUri,
+                projection,
+                imageSelection,
+                selectionArgs,
+                null
+            )
             if (videoCursor != null && videoCursor.moveToFirst()) {
                 // We found the ID. Deleting the item via the content provider will also remove the file
                 val id: Long =

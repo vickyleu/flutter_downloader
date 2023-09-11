@@ -8,9 +8,7 @@ import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.lang.Exception
 import java.net.URLConnection
-import kotlin.jvm.Synchronized
 
 object IntentUtils {
     private fun buildIntent(context: Context, file: File, mime: String?): Intent {

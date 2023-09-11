@@ -13,7 +13,7 @@ class TaskDbHelper private constructor(context: Context) :
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion == 2 && newVersion == 3) {
-            db.execSQL("ALTER TABLE " + TaskEntry.TABLE_NAME + " ADD COLUMN " + TaskEntry.COLUMN_SAVE_IN_PUBLIC_STORAGE + " TINYINT DEFAULT 0")
+            db.execSQL("""ALTER TABLE ${TaskEntry.TABLE_NAME} ADD COLUMN ${TaskEntry.COLUMN_SAVE_IN_PUBLIC_STORAGE} TINYINT DEFAULT 0""")
         } else {
             db.execSQL(SQL_DELETE_ENTRIES)
             onCreate(db)
@@ -28,26 +28,13 @@ class TaskDbHelper private constructor(context: Context) :
         const val DATABASE_VERSION = 3
         const val DATABASE_NAME = "download_tasks.db"
         private var instance: TaskDbHelper? = null
-        private const val SQL_CREATE_ENTRIES = (
-                "CREATE TABLE " + TaskEntry.TABLE_NAME + " (" +
-                        BaseColumns._ID + " INTEGER PRIMARY KEY," +
-                        TaskEntry.COLUMN_NAME_TASK_ID + " VARCHAR(256), " +
-                        TaskEntry.COLUMN_NAME_URL + " TEXT, " +
-                        TaskEntry.COLUMN_NAME_STATUS + " INTEGER DEFAULT 0, " +
-                        TaskEntry.COLUMN_NAME_PROGRESS + " INTEGER DEFAULT 0, " +
-                        TaskEntry.COLUMN_NAME_FILE_FID + " TEXT, " +
-                        TaskEntry.COLUMN_NAME_FILE_NAME + " TEXT, " +
-                        TaskEntry.COLUMN_NAME_SAVED_DIR + " TEXT, " +
-                        TaskEntry.COLUMN_NAME_HEADERS + " TEXT, " +
-                        TaskEntry.COLUMN_NAME_MIME_TYPE + " VARCHAR(128), " +
-                        TaskEntry.COLUMN_NAME_RESUMABLE + " TINYINT DEFAULT 0, " +
-                        TaskEntry.COLUMN_NAME_SHOW_NOTIFICATION + " TINYINT DEFAULT 0, " +
-                        TaskEntry.COLUMN_NAME_OPEN_FILE_FROM_NOTIFICATION + " TINYINT DEFAULT 0, " +
-                        TaskEntry.COLUMN_NAME_TIME_CREATED + " INTEGER DEFAULT 0, " +
-                        TaskEntry.COLUMN_SAVE_IN_PUBLIC_STORAGE + " TINYINT DEFAULT 0" +
-                        ")"
+        private val SQL_CREATE_ENTRIES = createEntries()
+
+        private fun createEntries() = (
+                """CREATE TABLE ${TaskEntry.TABLE_NAME} (${BaseColumns._ID} INTEGER PRIMARY KEY,${TaskEntry.COLUMN_NAME_TASK_ID} VARCHAR(256), ${TaskEntry.COLUMN_NAME_URL} TEXT, ${TaskEntry.COLUMN_NAME_STATUS} INTEGER DEFAULT 0, ${TaskEntry.COLUMN_NAME_PROGRESS} INTEGER DEFAULT 0, ${TaskEntry.COLUMN_NAME_FILE_FID} TEXT, ${TaskEntry.COLUMN_NAME_FILE_NAME} TEXT, ${TaskEntry.COLUMN_NAME_SAVED_DIR} TEXT, ${TaskEntry.COLUMN_NAME_HEADERS} TEXT, ${TaskEntry.COLUMN_NAME_MIME_TYPE} VARCHAR(128), ${TaskEntry.COLUMN_NAME_RESUMABLE} TINYINT DEFAULT 0, ${TaskEntry.COLUMN_NAME_SHOW_NOTIFICATION} TINYINT DEFAULT 0, ${TaskEntry.COLUMN_NAME_OPEN_FILE_FROM_NOTIFICATION} TINYINT DEFAULT 0, ${TaskEntry.COLUMN_NAME_TIME_CREATED} INTEGER DEFAULT 0, ${TaskEntry.COLUMN_SAVE_IN_PUBLIC_STORAGE} TINYINT DEFAULT 0)"""
                 )
-        private const val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + TaskEntry.TABLE_NAME
+
+        private const val SQL_DELETE_ENTRIES = """DROP TABLE IF EXISTS ${TaskEntry.TABLE_NAME}"""
 
         fun getInstance(ctx: Context?): TaskDbHelper {
             // Use the application context, which will ensure that you

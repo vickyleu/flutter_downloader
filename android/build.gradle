@@ -12,9 +12,9 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath 'com.android.tools.build:gradle:8.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'org.jlleitschuh.gradle:ktlint-gradle:11.0.0'
+        classpath 'org.jlleitschuh.gradle:ktlint-gradle:11.5.1'
     }
 }
 
@@ -22,6 +22,13 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url "https://storage.googleapis.com/download.flutter.io"
+        }
+        maven {
+            url 'http://download.flutter.io'
+            allowInsecureProtocol =true
+        }
     }
 }
 
@@ -30,8 +37,9 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: "org.jlleitschuh.gradle.ktlint"
 
 android {
-    compileSdkVersion 32
+    compileSdk 32
 
+    namespace="vn.hunghd.flutterdownloader"
     defaultConfig {
         minSdkVersion 19
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -54,7 +62,8 @@ dependencies {
     implementation "androidx.work:work-runtime:$work_version"
     // Kotlin + coroutines
     implementation "androidx.work:work-runtime-ktx:$work_version"
-    implementation 'androidx.annotation:annotation:1.4.0'
-    implementation 'androidx.core:core:1.9.0'
-    implementation 'androidx.fragment:fragment:1.5.2'
+    implementation 'androidx.annotation:annotation:1.6.0'
+    implementation 'androidx.core:core:1.10.1'
+    implementation 'androidx.fragment:fragment:1.6.1'
+    compileOnly "io.flutter:flutter_embedding_debug:1.0.0-b8d35810e91ab8fc39ba5e7a41bff6f697e8e3a8"
 }
