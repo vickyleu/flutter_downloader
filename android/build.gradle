@@ -14,7 +14,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'org.jlleitschuh.gradle:ktlint-gradle:11.5.1'
+//        classpath 'org.jlleitschuh.gradle:ktlint-gradle:11.5.1'
     }
 }
 
@@ -34,7 +34,7 @@ rootProject.allprojects {
 
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
-apply plugin: "org.jlleitschuh.gradle.ktlint"
+//apply plugin: "org.jlleitschuh.gradle.ktlint"
 
 android {
     compileSdk 32
