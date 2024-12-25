@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -21,6 +22,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
@@ -91,7 +93,7 @@ class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
             .setConstraints(
                 Constraints.Builder()
                     .setRequiresStorageNotLow(requiresStorageNotLow)
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                     .build()
             )
             .addTag(TAG)
@@ -165,7 +167,10 @@ class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
             url, savedDir, filename, headers, showNotification,
             openFileFromNotification, false, requiresStorageNotLow, saveInPublicStorage
         )
-        WorkManager.getInstance(requireContext()).enqueue(request)
+        WorkManager.getInstance(requireContext()).enqueue(request).result.addListener(
+            { Log.e("WorkManager", "Request successfully enqueued") },
+            Executors.newSingleThreadExecutor()
+        )
         val taskId: String = request.id.toString()
         result.success(taskId)
         sendUpdateProgress(taskId, DownloadStatus.ENQUEUED, 0)

@@ -24,6 +24,7 @@ class FlutterDownloaderInitializer : ContentProvider() {
         WorkManager.initialize(
             context,
             Configuration.Builder()
+                .setMinimumLoggingLevel(Log.VERBOSE)
                 .setExecutor(Executors.newFixedThreadPool(maximumConcurrentTask))
                 .build()
         )
