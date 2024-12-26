@@ -357,8 +357,12 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                         outputStream = context.contentResolver.openOutputStream(uri, "w")
                     } else {
                         val file = createFileInAppSpecificDir(filename!!, savedDir)
-                        savedFilePath = file!!.path
-                        outputStream = FileOutputStream(file, false)
+                        if(file!=null){
+                            savedFilePath = file.path
+                            outputStream = FileOutputStream(file, false)
+                        }else{
+                            throw IOException("File creation failed")
+                        }
                     }
                 }
                 var count = downloadedBytes
@@ -500,6 +504,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
     private fun createFileInAppSpecificDir(filename: String, savedDir: String): File? {
         val newFile = File(savedDir, filename)
         try {
+            Log.e("createFile","newFile::${newFile.absolutePath}  savedDir:$savedDir filename:$filename")
+            logError("newFile::${newFile.absolutePath}  savedDir:$savedDir filename:$filename")
             val rs: Boolean = newFile.createNewFile()
             if (rs) {
                 return newFile
@@ -842,7 +848,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
     companion object {
         const val ARG_URL = "url"
         const val ARG_FILE_NAME = "file_name"
-        const val ARG_SAVED_DIR = "saved_file"
+        const val ARG_SAVED_DIR = "saved_dir"
         const val ARG_HEADERS = "headers"
         const val ARG_IS_RESUME = "is_resume"
         const val ARG_SHOW_NOTIFICATION = "show_notification"

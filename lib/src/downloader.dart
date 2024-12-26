@@ -104,6 +104,8 @@ class FlutterDownloader {
     assert(_initialized, 'plugin flutter_downloader is not initialized');
     assert(Directory(savedDir).existsSync(), 'savedDir does not exist');
 
+    print("fileName======>>>>${fileName}");
+    print("savedDir======>>>>${savedDir}");
     try {
       final taskId = await _channel.invokeMethod<String>('enqueue', {
         'url': url,
