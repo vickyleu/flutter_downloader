@@ -221,40 +221,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             e.printStackTrace()
             dbHelper = null
             taskDao = null
+            android.util.Log.e("DownloadWorker", "Download failed ${e.message}")
             Result.failure()
         }
-    }
-
-    private fun setupHeaders(conn: HttpURLConnection, headers: String) {
-        if (headers.isNotEmpty()) {
-            log("Headers = $headers")
-            try {
-                val json = JSONObject(headers)
-                val it: Iterator<String> = json.keys()
-                while (it.hasNext()) {
-                    val key = it.next()
-                    conn.setRequestProperty(key, json.getString(key))
-                }
-                conn.doInput = true
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun setupPartialDownloadedDataHeader(
-        conn: HttpURLConnection,
-        filename: String?,
-        savedDir: String
-    ): Long {
-        val saveFilePath = savedDir + File.separator + filename
-        val partialFile = File(saveFilePath)
-        val downloadedBytes: Long = partialFile.length()
-        log("Resume download: Range: bytes=$downloadedBytes-")
-        conn.setRequestProperty("Accept-Encoding", "identity")
-        conn.setRequestProperty("Range", "bytes=$downloadedBytes-")
-        conn.doInput = true
-        return downloadedBytes
     }
 
     private fun downloadFile(
@@ -491,6 +460,39 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             httpConn?.disconnect()
         }
     }
+
+    private fun setupHeaders(conn: HttpURLConnection, headers: String) {
+        if (headers.isNotEmpty()) {
+            log("Headers = $headers")
+            try {
+                val json = JSONObject(headers)
+                val it: Iterator<String> = json.keys()
+                while (it.hasNext()) {
+                    val key = it.next()
+                    conn.setRequestProperty(key, json.getString(key))
+                }
+                conn.doInput = true
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun setupPartialDownloadedDataHeader(
+        conn: HttpURLConnection,
+        filename: String?,
+        savedDir: String
+    ): Long {
+        val saveFilePath = savedDir + File.separator + filename
+        val partialFile = File(saveFilePath)
+        val downloadedBytes: Long = partialFile.length()
+        log("Resume download: Range: bytes=$downloadedBytes-")
+        conn.setRequestProperty("Accept-Encoding", "identity")
+        conn.setRequestProperty("Range", "bytes=$downloadedBytes-")
+        conn.doInput = true
+        return downloadedBytes
+    }
+
 
     /**
      * Create a file using java.io API
